@@ -10,19 +10,23 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  gui_tests:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: cd IMDB && dotnet restore
-    - name: Build
-      run: cd IMDB && dotnet build --no-restore
-    - name: Test
-      run: cd E2ETesting-main && dotnet test --no-build --verbosity normal
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install dotnet project dependencies
+        run: cd IMDB && dotnet restore
+      - name: Restore Playwright Project
+        run: cd E2ETesting-main && dotnet restore
+      - name: Ensure browsers are installed
+        run: cd E2ETesting-main && pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps # byt ut ShopTester.Tests mot ditt test projekt sökväg
+      - name: Build Playwright Project
+        run: cd E2ETesting-main && dotnet build
+      - name: Start server
+        run: cd IMDB # && nohup dotnet run
+      - name: Run GUI-tests
+        run: cd E2ETesting-main && dotnet test
